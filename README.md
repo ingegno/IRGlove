@@ -21,6 +21,8 @@ Maak eerst de constructie op een breadboard. Daarna laden we de code op naar de 
 *Hier komt foto schema en breadboard constructie*
 
 ## Code Installeren
+
+### Benodigdheden
 Installeer op je computer de Arduino IDE 1.8.8. 
 
 Installeer dan via de library manager volgende bibliotheek:
@@ -34,5 +36,24 @@ Download vervolgens [IRLib2](https://github.com/cyborg5/IRLib2) via de **Downloa
     Arduino/libraries/IRLibRecv
     Arduino/libraries/IRLibRecvPCI
 
+### IRGlove code
+Download de code hier via de **Download zip** knop en unzip de download. Dubbel klik op de `IRGlove-master/IRGlove/IRGlove.ino` file in de unzipped code folder. Dit zal Arduino 1.8.8 openen op onze code. 
 
+Selecteer als bord Arduino Nano. Druk op compileer om te code te verifieren. 
 
+Krijg je de fout:
+
+    lto1: internal compiler error: in lto_output_varpool_node, at lto-cgraph.c:624
+    Please submit a full bug report,
+    with preprocessed source if appropriate.
+
+dan dien je oplossing uit [deze thread](https://forum.arduino.cc/index.php?topic=574020.0) uit te voeren als gevolg van bug [39](https://github.com/arduino/ArduinoCore-avr/issues/39):
+
+    Tools > Board > Boards Manager
+    Wait for downloads to finish.
+    When you move the mouse pointer over "Arduino AVR Boards", you will see a "Select version" dropdown menu appear. Select "1.6.21".
+    Click "Install".
+    Wait for installation to finish.
+    Click "Close".
+
+Na dit project kun je opnieuw de laatste versie van de *Arduino AVR Boards* installeren.
