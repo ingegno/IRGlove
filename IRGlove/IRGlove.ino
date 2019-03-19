@@ -95,7 +95,7 @@ void storeCode(int codeIndex) {
       codeBits[codeIndex] = myDecoder.bits;
       //Updaten van EEPROM
       EEPROM.updateLong(codeIndex*50, codeValue[codeIndex]);
-      EEPROM.updateByte((i*50)+40, codeBits[codeIndex]);
+      EEPROM.updateByte((codeIndex*50)+40, codeBits[codeIndex]);
     }
     Serial.print(F(" Value:0x"));
     Serial.println(codeValue[codeIndex], HEX);
