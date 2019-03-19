@@ -21,7 +21,18 @@ Maak eerst de constructie op een breadboard. Daarna laden we de code op naar de 
 *Hier komt foto schema en breadboard constructie*
 
 ## Code Installeren
-Installeer op je computer de Arduino IDE. 
+Installeer op je computer de Arduino IDE 1.8.8. 
+
+Installeer dan via de library manager volgende bibliotheek:
+* EEPROMEx versie 1.0.0 van Thijs Elenbaas
+
+Download vervolgens [IRLib2](https://github.com/cyborg5/IRLib2) via de **Download Zip** knop (Wij gebruiken versie 3 Jun 2018). Unzip de download, en kopieer **een deel** van de Download naar de Arduino library folder zodat deze volgende structuur heeft: 
+
+    Arduino/libraries/IRLib2
+    Arduino/libraries/IRLibFreq
+    Arduino/libraries/IRLibProtocols
+    Arduino/libraries/IRLibRecv
+    Arduino/libraries/IRLibRecvPCI
 
 
 
