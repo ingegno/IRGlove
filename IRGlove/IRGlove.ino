@@ -31,6 +31,7 @@ int programCode = 0;
 const String vinger[COUNT] = {"wijsvinger", "middelvinger", "ringvinger"};
 
 const int INPUTS[COUNT] = {8, 9, 10};
+const int PROGRAM_PIN = 7;
 
 // Storage for the recorded code
 uint8_t codeProtocol;  // The type of code
@@ -55,6 +56,9 @@ void setup() {
     codeValue[i] = EEPROM.readLong(i*50);
     codeBits[i] = EEPROM.readByte((i*50)+40);
   }
+  // Program pin is a pushbutton or the pinky
+  pinMode(PROGRAM_PIN, INPUT_PULLUP);
+
   while (!Serial) {
     ; // wait for serial port to connect. Needed for native USB port only
   }
