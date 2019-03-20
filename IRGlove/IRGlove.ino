@@ -26,11 +26,11 @@ IRsend mySender;
 #include <IRLibRecv.h>
 IRrecv myReceiver(12); //pin number for the receiver
 
-const int COUNT = 2;
+const int COUNT = 3;
 int programCode = 0;
-const String vinger[COUNT] = {"wijsvinger", "middelvinger"};
+const String vinger[COUNT] = {"wijsvinger", "middelvinger", "ringvinger"};
 
-const int INPUTS[COUNT] = {8, 9};
+const int INPUTS[COUNT] = {8, 9, 10};
 
 // Storage for the recorded code
 uint8_t codeProtocol;  // The type of code
@@ -153,7 +153,7 @@ void sendCode(int codeIndex) {
 void loop() {
   if (Serial.available() > 0) {
     programCode = Serial.parseInt();   // returns 0 on failure/timeout!
-    if (programCode >= 1 && programCode <=2 ) {
+    if (programCode >= 1 && programCode <= COUNT ) {
       Serial.print("Received ");
       Serial.println(programCode);
       procesCommand(programCode-1);
