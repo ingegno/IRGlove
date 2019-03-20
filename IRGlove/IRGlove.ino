@@ -80,11 +80,22 @@ void storeCode(int codeIndex) {
   codeProtocol = myDecoder.protocolNum;
   Serial.print(F("Received "));
   Serial.print(Pnames(codeProtocol));
+  
   if (codeProtocol == UNKNOWN) {
+    // print out the data
     Serial.println(F(" saving raw data."));
     myDecoder.dumpResults();
-    codeValue[codeIndex] = myDecoder.value;
-    codeBits[codeIndex] = myDecoder.bits;
+
+    //clean up data as needed
+    //The raw time values start in decodeBuffer[1] because
+    //the [0] entry is the gap between frames. The address
+    //is passed to the raw send routine.
+    codeValue[codeIndex] = (uint32_t) & (recvGlobal.decodeBuffer[1]);
+    //This isn't really number of bits. It's the number of entries
+    //in the buffer.
+    codeBits[codeIndex] = recvGlobal.decodeLength - 1;
+//    codeValue[codeIndex] = myDecoder.value;
+//    codeBits[codeIndex] = myDecoder.bits;
     //updaten van EEPROM
     EEPROM.updateLong(codeIndex*50, codeValue[codeIndex]);
     EEPROM.updateByte((codeIndex*50)+40, codeBits[codeIndex]);
