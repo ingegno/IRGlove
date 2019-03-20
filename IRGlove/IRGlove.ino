@@ -5,12 +5,13 @@
 */
 #include <IRLibDecodeBase.h>  //We need both the coding and
 #include <IRLibSendBase.h>    // sending base classes
-#include <IRLib_P01_NEC.h>    //Lowest numbered protocol 1st
-#include <IRLib_P02_Sony.h>   // Include only protocols you want
-#include <IRLib_P03_RC5.h>
-#include <IRLib_P04_RC6.h>
-#include <IRLib_P05_Panasonic_Old.h>
-#include <IRLib_P07_NECx.h>
+// we don't need to understand what is send, only be able to reproduce it!
+//#include <IRLib_P01_NEC.h>    //Lowest numbered protocol 1st
+//#include <IRLib_P02_Sony.h>   // Include only protocols you want
+//#include <IRLib_P03_RC5.h>
+//#include <IRLib_P04_RC6.h>
+//#include <IRLib_P05_Panasonic_Old.h>
+//#include <IRLib_P07_NECx.h>
 #include <IRLib_HashRaw.h>    //We need this for IRsendRaw
 #include <IRLibCombo.h>       // After all protocols, include this
 // All of the above automatically creates a universal decoder
@@ -41,12 +42,13 @@ uint8_t codeBits[COUNT] = {0};      // The length of the code in bits
 bool gotOne, gotNew;
 
 void setup() {
-  gotOne = false; gotNew = false;
+  //gotOne = false; gotNew = false;
   codeProtocol = UNKNOWN;
   //codeValue = 0;
   //EEPROM_readAnything(0, configuration);
 
   Serial.begin(9600);
+  // obtain last stored values from EEPROM memory after startup
   for (int i = 0; i < COUNT; i++) {
     pinMode(INPUTS[i], INPUT_PULLUP);
     //Inlezen van EEPROM
@@ -57,7 +59,6 @@ void setup() {
     ; // wait for serial port to connect. Needed for native USB port only
   }
   displayMenu();
-  myReceiver.enableIRIn(); // Start the receiver
 }
 
 void displayMenu() {
@@ -75,7 +76,7 @@ void displayMenu() {
 
 // Stores the code for later playback
 void storeCode(int codeIndex) {
-  gotNew = true;    gotOne = true;
+  //gotNew = true;    gotOne = true;
   codeProtocol = myDecoder.protocolNum;
   Serial.print(F("Received "));
   Serial.print(Pnames(codeProtocol));
@@ -83,8 +84,10 @@ void storeCode(int codeIndex) {
     Serial.println(F(" saving raw data."));
     myDecoder.dumpResults();
     codeValue[codeIndex] = myDecoder.value;
+    codeBits[codeIndex] = myDecoder.bits;
     //updaten van EEPROM
     EEPROM.updateLong(codeIndex*50, codeValue[codeIndex]);
+    EEPROM.updateByte((codeIndex*50)+40, codeBits[codeIndex]);
   }
   else {
     if (myDecoder.value == REPEAT_CODE) {
@@ -103,30 +106,31 @@ void storeCode(int codeIndex) {
 }
 
 void sendCode(int codeIndex) {
-  if ( !gotNew ) { //We've already sent this so handle toggle bits
-    if (codeProtocol == RC5) {
-      codeValue[codeIndex] ^= 0x0800;
-    }
-    else if (codeProtocol == RC6) {
-      switch (codeBits[codeIndex]) {
-        case 20: codeValue[codeIndex] ^= 0x10000; break;
-        case 24: codeValue[codeIndex] ^= 0x100000; break;
-        case 28: codeValue[codeIndex] ^= 0x1000000; break;
-        case 32: codeValue[codeIndex] ^= 0x8000; break;
-      }
-    }
-  }
-  gotNew = false;
-  if (codeProtocol == UNKNOWN) {
-    //The raw time values start in decodeBuffer[1] because
-    //the [0] entry is the gap between frames. The address
-    //is passed to the raw send routine.
-    codeValue[codeIndex] = (uint32_t) & (recvGlobal.decodeBuffer[1]);
-    //This isn't really number of bits. It's the number of entries
-    //in the buffer.
-    codeBits[codeIndex] = recvGlobal.decodeLength - 1;
-    Serial.println(F("Sent raw"));
-  }
+//  if ( !gotNew ) { //We've already sent this so handle toggle bits
+//    if (codeProtocol == RC5) {
+//      codeValue[codeIndex] ^= 0x0800;
+//    }
+//    else if (codeProtocol == RC6) {
+//      switch (codeBits[codeIndex]) {
+//        case 20: codeValue[codeIndex] ^= 0x10000; break;
+//        case 24: codeValue[codeIndex] ^= 0x100000; break;
+//        case 28: codeValue[codeIndex] ^= 0x1000000; break;
+//        case 32: codeValue[codeIndex] ^= 0x8000; break;
+//      }
+//    }
+//  }
+//  gotNew = false;
+//  if (codeProtocol == UNKNOWN) {
+//    //The raw time values start in decodeBuffer[1] because
+//    //the [0] entry is the gap between frames. The address
+//    //is passed to the raw send routine.
+//    codeValue[codeIndex] = (uint32_t) & (recvGlobal.decodeBuffer[1]);
+//    //This isn't really number of bits. It's the number of entries
+//    //in the buffer.
+//    codeBits[codeIndex] = recvGlobal.decodeLength - 1;
+//    Serial.println(F("Sent raw"));
+//  }
+  // send the raw data we stored!
   mySender.send(codeProtocol, codeValue[codeIndex], codeBits[codeIndex]);
   if (codeProtocol == UNKNOWN) return;
   Serial.print(F("Sent "));
@@ -143,17 +147,27 @@ void loop() {
     procesCommand(programCode);
     displayMenu();
   }
+  // react if a button (=closing finger) is pushed
   procesInputs();
 }
 
 void procesCommand(int code) {
+  // we make us ready to receive signals
+  myReceiver.enableIRIn(); // Start the receiver. This uses interrupt code, so we can use delay!
+  delay(1000);
+  // we write on Serial what user has to do
+  Serial.println("Houd de IR-afstandsbediening voor de ontvanger en druk je commando in..");
+  // loop tot resultaten binnen zijn
   do {
-    Serial.println("Houd de IR-afstandsbediening voor de ontvanger en druk je commando in..");
     delay(1000);
+    Serial.println("Nog niets ontvangen");
   } while (!myReceiver.getResults());
+  // decodeer signaal
   myDecoder.decode();
+  // sla signaal op
   storeCode(code);
-  myReceiver.enableIRIn(); // Re-enable receiver
+  Serial.print("Code opgeslagen als signaal: ");
+  Serial.println(code);
 }
 
 void procesInputs() {
