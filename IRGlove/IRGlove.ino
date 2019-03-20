@@ -65,8 +65,8 @@ void displayMenu() {
   Serial.println("GloveIR STEAMbox menu");
   Serial.println("*********************");
   for (int i = 0; i < COUNT; i++) {
-    Serial.print("Duw op ");
-    Serial.print(i);
+    Serial.print("Stuur via deze monitor nummer ");
+    Serial.print(i+1);
     Serial.print(", om de code voor de ");
     Serial.print(vinger[i]);
     Serial.println(" op te nemen.");
@@ -140,12 +140,14 @@ void sendCode(int codeIndex) {
 }
 
 void loop() {
-  if (Serial.available()) {
-    programCode = Serial.parseInt();
-    Serial.print("Received ");
-    Serial.println(programCode);
-    procesCommand(programCode);
-    displayMenu();
+  if (Serial.available() > 0) {
+    programCode = Serial.parseInt();   // returns 0 on failure/timeout!
+    if (programCode >= 1 && programCode <=2 ) {
+      Serial.print("Received ");
+      Serial.println(programCode);
+      procesCommand(programCode-1);
+      displayMenu();
+    }
   }
   // react if a button (=closing finger) is pushed
   procesInputs();
@@ -167,12 +169,14 @@ void procesCommand(int code) {
   // sla signaal op
   storeCode(code);
   Serial.print("Code opgeslagen als signaal: ");
-  Serial.println(code);
+  Serial.println(code+1);
 }
 
 void procesInputs() {
   for (int i = 0; i < COUNT; i++) {
     if (digitalRead(INPUTS[i]) == LOW) {
+      Serial.print("Sending out code ");
+      Serial.println(i+1);
       sendCode(i);
       delay(100);
     }
