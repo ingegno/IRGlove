@@ -38,6 +38,8 @@ Download vervolgens [IRLib2](https://github.com/cyborg5/IRLib2) via de **Downloa
     Arduino/libraries/IRLibRecv
     Arduino/libraries/IRLibRecvPCI
 
+Op Windows is dit normaal in locatie `C:\Users\USERNAME\Documents\Arduino`, op linux in `\home\USERNAME\Arduino`.
+
 ### IRGlove code
 Download de code hier via de **Download zip** knop en unzip de download. Dubbel klik op de `IRGlove-master/IRGlove/IRGlove.ino` file in de unzipped code folder. Dit zal Arduino 1.8.8 openen op onze code. 
 
