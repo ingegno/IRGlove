@@ -6,12 +6,12 @@
 #include <IRLibDecodeBase.h>  //We need both the coding and
 #include <IRLibSendBase.h>    // sending base classes
 // we don't need to understand what is send, only be able to reproduce it!
-//#include <IRLib_P01_NEC.h>    //Lowest numbered protocol 1st
-//#include <IRLib_P02_Sony.h>   // Include only protocols you want
-//#include <IRLib_P03_RC5.h>
-//#include <IRLib_P04_RC6.h>
-//#include <IRLib_P05_Panasonic_Old.h>
-//#include <IRLib_P07_NECx.h>
+#include <IRLib_P01_NEC.h>    //Lowest numbered protocol 1st
+#include <IRLib_P02_Sony.h>   // Include only protocols you want
+#include <IRLib_P03_RC5.h>
+#include <IRLib_P04_RC6.h>
+#include <IRLib_P05_Panasonic_Old.h>
+#include <IRLib_P07_NECx.h>
 #include <IRLib_HashRaw.h>    //We need this for IRsendRaw
 #include <IRLibCombo.h>       // After all protocols, include this
 // All of the above automatically creates a universal decoder
@@ -121,6 +121,7 @@ void storeCode(int codeIndex) {
 }
 
 void sendCode(int codeIndex) {
+//  // Following toggle bits, see https://learn.adafruit.com/using-an-infrared-library/hardware-needed#rc5-and-rc6-toggle-bits-3-12
 //  if ( !gotNew ) { //We've already sent this so handle toggle bits
 //    if (codeProtocol == RC5) {
 //      codeValue[codeIndex] ^= 0x0800;
