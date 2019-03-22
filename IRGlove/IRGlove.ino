@@ -37,12 +37,30 @@ const int IR_RECEIVE_PIN = 12;
 // pin used by the IR sender is based on your hardware. UNO and NANO are pin 3
 // for other boards look up the pin in IRLibProtocols/IRLibHardware.h of the library!
 
+// pin with LED output to indicate programming state or not. Default is builtinLED pin 13
+const int builtInLed = 13;
+
 // set serial output on or off
 #define TEST_WITH_SERIAL false
 
 /*  CODE 
  *   
 */
+int program_state;
+const int programbtn = PROGRAM_PIN;
+boolean builtInLed_ON = HIGH;
+// there must be at least one finger. In setup we correct this if more!
+int finger1 = INPUTS[0];
+int finger2 = INPUTS[0];
+int finger3 = INPUTS[0];
+
+boolean programbtn_PRESSED = LOW;
+
+boolean finger1_PRESSED = LOW;
+
+boolean finger2_PRESSED = LOW;
+
+boolean finger3_PRESSED = LOW;
 
 const int maxAllowedWrites = 80;
 // start reading from the first byte (address 120) of the EEPROM
@@ -80,6 +98,47 @@ uint8_t codeProtocol[COUNT] = {0};  // The type of code
 uint32_t codeValue[COUNT] = {0};    // The data bits if type is not raw
 uint8_t codeBits[COUNT] = {0};      // The length of the code in bits
 
+long programbtnbuttonTimer = 0;
+#define programbtnminShortPressTime 80
+#define programbtnlongPressTime 750
+boolean programbtnbuttonActive = false;
+boolean programbtnlongPressActive = false;
+#define programbtnNOPRESS    0
+#define programbtnSHORTPRESS 1
+#define programbtnLONGPRESS  2
+int programbtnPressType = programbtnNOPRESS;
+long finger1buttonTimer = 0;
+#define finger1minShortPressTime 80
+#define finger1longPressTime 750
+boolean finger1buttonActive = false;
+boolean finger1longPressActive = false;
+#define finger1NOPRESS    0
+#define finger1SHORTPRESS 1
+#define finger1LONGPRESS  2
+int finger1PressType = finger1NOPRESS;
+long finger2buttonTimer = 0;
+#define finger2minShortPressTime 80
+#define finger2longPressTime 750
+boolean finger2buttonActive = false;
+boolean finger2longPressActive = false;
+#define finger2NOPRESS    0
+#define finger2SHORTPRESS 1
+#define finger2LONGPRESS  2
+int finger2PressType = finger2NOPRESS;
+long finger3buttonTimer = 0;
+#define finger3minShortPressTime 80
+#define finger3longPressTime 750
+boolean finger3buttonActive = false;
+boolean finger3longPressActive = false;
+#define finger3NOPRESS    0
+#define finger3SHORTPRESS 1
+#define finger3LONGPRESS  2
+int finger3PressType = finger3NOPRESS;
+
+int ard_effect0_status = -1;
+unsigned long ard_effect0_start, ard_effect0_time;
+#define EFFECT0_PERIOD 500
+#define EFFECT0_1_DURATION 250
 
 void setup() {
   // start reading from position memBase (address 0) of the EEPROM. Set maximumSize to EEPROMSizeUno 
@@ -122,6 +181,15 @@ void setup() {
   pinMode(PROGRAM_PIN, INPUT_PULLUP);
 
   if (TEST_WITH_SERIAL) displayMenu();
+  
+  if (COUNT > 1) {finger2 = INPUTS[1];}
+  if (COUNT > 2) finger3 = INPUTS[2];
+  
+  ard_effect0_status = -1;
+  ard_effect0_start = millis();
+
+  digitalWrite(builtInLed, ! (builtInLed_ON));
+  program_state = 0;
 }
 
 void displayMenu() {
@@ -144,8 +212,32 @@ void displayMenu() {
   }
   Serial.println();
 }
+void flickerLED() {
+  //Variables of this effect are reffered to with ard_effect0
+  boolean restart = false;
+  ard_effect0_time = millis() - ard_effect0_start;
+  if (ard_effect0_time > EFFECT0_PERIOD) {
+    //end effect, make sure it restarts
+    if (ard_effect0_status > -1) {
+    }
+    restart = true;
+    ard_effect0_status = -1;
+    ard_effect0_start = ard_effect0_start + ard_effect0_time;
+    ard_effect0_time = 0;
+  }
+  if (not restart && ard_effect0_status == -1) {
+    ard_effect0_status = 0;
+    ard_effect0_start = ard_effect0_start + ard_effect0_time;
+    ard_effect0_time = 0;
+  digitalWrite(builtInLed, builtInLed_ON);
+  }
+  if (ard_effect0_time > EFFECT0_1_DURATION && ard_effect0_status < 1) {
+   ard_effect0_status = 1;
+  digitalWrite(builtInLed, ! (builtInLed_ON));
+  }
+}
 
-void loop() {
+void normalState() {
   if (TEST_WITH_SERIAL) {
     // one can set commands using serial monitor input
     if (Serial.available() > 0) {
@@ -154,17 +246,211 @@ void loop() {
         if (LANG_OUTPUT == LANG_NL) Serial.print("Ontvangen ");
         else Serial.print("Received ");
         Serial.println(programCode);
-        procesCommand(programCode-1);
+        programActionForVinger(programCode-1);
         displayMenu();
       }
     }
   }
   
   // react if a button (=closing finger) is pushed
-  procesInputs();
+  processInputs();
 }
 
-void procesCommand(int code) {
+void handleprogrambtnPress() {
+  programbtnPressType = programbtnNOPRESS;
+      if (digitalRead(programbtn) == programbtn_PRESSED) {
+        if (programbtnbuttonActive == false) {
+          programbtnbuttonActive = true;
+          programbtnbuttonTimer = millis();
+        }
+        if ((millis() - programbtnbuttonTimer > programbtnlongPressTime) && (programbtnlongPressActive == false)) {
+          programbtnlongPressActive = true;
+          programbtnPressType = programbtnLONGPRESS;
+        }
+      } else {
+        if (programbtnbuttonActive == true) {
+          if (programbtnlongPressActive == true) {
+            programbtnlongPressActive = false;
+          } else {
+            //avoid fast fluctuations to be identified as a click
+            if (millis() - programbtnbuttonTimer > programbtnminShortPressTime)
+              programbtnPressType = programbtnSHORTPRESS;
+          }
+          programbtnbuttonActive = false;
+        }
+      }
+}
+
+
+
+void handlefinger1Press() {
+  finger1PressType = finger1NOPRESS;
+      if (digitalRead(finger1) == finger1_PRESSED) {
+        if (finger1buttonActive == false) {
+          finger1buttonActive = true;
+          finger1buttonTimer = millis();
+        }
+        if ((millis() - finger1buttonTimer > finger1longPressTime) && (finger1longPressActive == false)) {
+          finger1longPressActive = true;
+          finger1PressType = finger1LONGPRESS;
+        }
+      } else {
+        if (finger1buttonActive == true) {
+          if (finger1longPressActive == true) {
+            finger1longPressActive = false;
+          } else {
+            //avoid fast fluctuations to be identified as a click
+            if (millis() - finger1buttonTimer > finger1minShortPressTime)
+              finger1PressType = finger1SHORTPRESS;
+          }
+          finger1buttonActive = false;
+        }
+      }
+}
+
+
+
+void handlefinger2Press() {
+  finger2PressType = finger2NOPRESS;
+      if (digitalRead(finger2) == finger2_PRESSED) {
+        if (finger2buttonActive == false) {
+          finger2buttonActive = true;
+          finger2buttonTimer = millis();
+        }
+        if ((millis() - finger2buttonTimer > finger2longPressTime) && (finger2longPressActive == false)) {
+          finger2longPressActive = true;
+          finger2PressType = finger2LONGPRESS;
+        }
+      } else {
+        if (finger2buttonActive == true) {
+          if (finger2longPressActive == true) {
+            finger2longPressActive = false;
+          } else {
+            //avoid fast fluctuations to be identified as a click
+            if (millis() - finger2buttonTimer > finger2minShortPressTime)
+              finger2PressType = finger2SHORTPRESS;
+          }
+          finger2buttonActive = false;
+        }
+      }
+}
+
+void handlefinger3Press() {
+  finger3PressType = finger3NOPRESS;
+      if (digitalRead(finger3) == finger3_PRESSED) {
+        if (finger3buttonActive == false) {
+          finger3buttonActive = true;
+          finger3buttonTimer = millis();
+        }
+        if ((millis() - finger3buttonTimer > finger3longPressTime) && (finger3longPressActive == false)) {
+          finger3longPressActive = true;
+          finger3PressType = finger3LONGPRESS;
+        }
+      } else {
+        if (finger3buttonActive == true) {
+          if (finger3longPressActive == true) {
+            finger3longPressActive = false;
+          } else {
+            //avoid fast fluctuations to be identified as a click
+            if (millis() - finger3buttonTimer > finger3minShortPressTime)
+              finger3PressType = finger3SHORTPRESS;
+          }
+          finger3buttonActive = false;
+        }
+      }
+}
+void programState() {
+  handlefinger1Press();
+
+  if (finger1PressType == finger1SHORTPRESS) {
+    //START STATEMENTS SHORT PRESS
+    program_state = 2;
+    //END  STATEMENTS SHORT PRESS
+  } else if (finger1PressType == finger1LONGPRESS) {
+    //START STATEMENTS LONG PRESS
+    //END  STATEMENTS LONG PRESS
+  } else if (!finger1longPressActive && digitalRead(finger1) == finger1_PRESSED) {
+    //START STATEMENTS PRESS
+    //END  STATEMENTS PRESS
+  }
+
+  if (COUNT > 1) {
+    handlefinger2Press();
+  
+    if (finger2PressType == finger2SHORTPRESS) {
+      //START STATEMENTS SHORT PRESS
+      program_state = 3;
+      //END  STATEMENTS SHORT PRESS
+    } else if (finger2PressType == finger2LONGPRESS) {
+      //START STATEMENTS LONG PRESS
+      //END  STATEMENTS LONG PRESS
+    } else if (!finger2longPressActive && digitalRead(finger2) == finger2_PRESSED) {
+      //START STATEMENTS PRESS
+      //END  STATEMENTS PRESS
+    }
+  }
+
+
+  if (COUNT > 2) {
+  handlefinger3Press();
+  
+    if (finger3PressType == finger3SHORTPRESS) {
+      //START STATEMENTS SHORT PRESS
+      program_state = 4;
+      //END  STATEMENTS SHORT PRESS
+    } else if (finger3PressType == finger3LONGPRESS) {
+      //START STATEMENTS LONG PRESS
+      //END  STATEMENTS LONG PRESS
+    } else if (!finger3longPressActive && digitalRead(finger3) == finger3_PRESSED) {
+      //START STATEMENTS PRESS
+      //END  STATEMENTS PRESS
+    }
+  }
+
+}
+
+void loop() {
+  
+  handleprogrambtnPress();
+
+  if (programbtnPressType == programbtnSHORTPRESS) {
+    //START STATEMENTS SHORT PRESS
+    if (program_state == 0) {
+      program_state = 1;
+    } else if (program_state == 1) {
+      program_state = 0;
+    }
+    //END  STATEMENTS SHORT PRESS
+  } else if (programbtnPressType == programbtnLONGPRESS) {
+    //START STATEMENTS LONG PRESS
+    //END  STATEMENTS LONG PRESS
+  } else if (!programbtnlongPressActive && digitalRead(programbtn) == programbtn_PRESSED) {
+    //START STATEMENTS PRESS
+    //END  STATEMENTS PRESS
+  }
+
+  if (program_state == 0) {
+    digitalWrite(builtInLed, ! (builtInLed_ON));
+    normalState();
+  } else if (program_state == 1) {
+    flickerLED();
+    programState();
+  } else if (program_state == 2) {
+    digitalWrite(builtInLed, builtInLed_ON);
+    programActionForVinger(0);
+    program_state = 0;
+  } else if (program_state == 3) {
+    digitalWrite(builtInLed, builtInLed_ON);
+    programActionForVinger(1);
+    program_state = 0;
+  } else if (program_state == 4) {
+    digitalWrite(builtInLed, builtInLed_ON);
+    programActionForVinger(2);
+    program_state = 0;
+  }
+}
+
+void programActionForVinger(int code) {
   // we make us ready to receive signals
   myReceiver.enableIRIn(); // Start the receiver. This uses interrupt code, so we can use delay!
   delay(1000);
@@ -241,7 +527,7 @@ void storeCode(int codeIndex) {
 }
 
 
-void procesInputs() {
+void processInputs() {
   for (int i = 0; i < COUNT; i++) {
     if (digitalRead(INPUTS[i]) == LOW) {
       if (TEST_WITH_SERIAL) {
