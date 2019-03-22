@@ -28,45 +28,84 @@ We beginnen met de electronica klaarmaken.
 
 **Stap 1** 
 
+Plaats de Nano op de Nano houder. Zorg dat pinnen juist zitten !
+
+Maak draden die met de handschoen zullen verbinden voor de 5 fingers. Connecteer dan als volgt
+
+* duim: GND zoals op foto
+* wijsvinger: D10
+* middelvinger: D9
+* ringvinger: D8
+* pink: D7
+
 ![stap01](doc/fig/construction_01.png)
 
-
 **Stap 2** 
+
+De 9V batterijhouder connecteer je met Vin en GND aan de andere kant. Opgelet, Vin is **ROOD**.
 
 ![stap02](doc/fig/construction_02.png)
 
 
 **Stap 3** 
 
+Soldeer de 330 Ohm weerstand aan middelste beentje van de transistor zoals op de foto. Dus, aan de platte kant
+van de transistor!
+
 ![stap03](doc/fig/construction_03.png)
 
-
 **Stap 4** 
+
+Bescherm nu middelste beentje transistor met een krimpkous.
+
+Aan de *linkerkant* (als je kijkt op platte kant transistor) soldeer je de 10 Ohm weerstand. En daaraan dan een draad
+die lang genoeg is om tot aan de knokels van je hand te lopen.
 
 ![stap04](doc/fig/construction_04.png)
 
 
 **Stap 5** 
 
+Soldeer einde van die draad nu aan **korste** beentje van de IR LED (onze *zender*). Bescherm met krimpkous.
+
 ![stap05](doc/fig/construction_05.png)
 
+Het lange beentje van de IR LED is de +. Neem dan ook een **rode** draad, en soldeer hem eraan. Knip beentje LED
+eerst wat korter dat je niet teveel krimpkous nodig hebt
 
 **Stap 6** 
+
+De rode draad van de IR LED stop je in de 5V van de NANO houder **samen** met **rechter** been van de IR ontvanger
+(rechts als je kijkt naar de uitstulping).
 
 ![stap06](doc/fig/construction_06.png)
 
 
 **Stap 7** 
 
+Om kortsluiting te vermijden, doe krimpkous over bovenkant van middelste been IR ontvangen, en stop deze dan, na 
+plooien in de GND van de Arduino houder
+
 ![stap07](doc/fig/construction_07.png)
 
+Buig linkse been IR ontvanger naar achter.
+
 **Stap 8** 
+
+Soldeer een draad aan linkse been IR ontvanger, en bevestig andere uiteinde aan pin D12.
 
 ![stap08](doc/fig/construction_08.png)
 
 **Stap 9** 
 
+Je hebt nu enkel nog de transistor die los zit. De *rechterkant* (als je kijkt op platte kant transistor) van de 
+transistor moet in de GND, terwijl uiteinde van de 330 Ohm weerstand in pin D3 moet. Dat moet normaal
+lukken zoals op volgende foto:
+
 ![stap09](doc/fig/construction_09.png)
+
+Je circuit is af. We moeten nu de vingers bevestigen aan de handschoen, en de IR LED plaatsen waar we signalen 
+willen uitsturen.
 
 ### Handschoen
 
