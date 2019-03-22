@@ -19,6 +19,7 @@ We doen volgende wijzigingen tov het Phalabs project
 Maak eerst de constructie op een breadboard. Daarna laden we de code op naar de Arduino, en testen.
 
 *Hier komt foto schema en breadboard constructie*
+![circuit](doc/fig/IRGlove_Circuit.png)
 
 ## Code Installeren
 
