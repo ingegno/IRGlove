@@ -1,8 +1,13 @@
+/* Based on record.ino Example sketch from IRLib2 - GPL v3
+ *  Adapted by VUB http://phablabs.eu/workshop/ir-glove 
+ *  Adapted by Ingegno Maker Space:
+ *      - fix bugs
+ *      - correct store of signals
+ *      
+*/
 #include <EEPROMex.h>
 #include <EEPROMVar.h>
-/* record.ino Example sketch for IRLib2
-    Illustrate how to record a signal and then play it back.
-*/
+
 #include <IRLibDecodeBase.h>  //We need both the coding and
 #include <IRLibSendBase.h>    // sending base classes
 // we don't need to understand what is send, only be able to reproduce it!
@@ -28,6 +33,7 @@ IRrecv myReceiver(12); //pin number for the receiver
 
 const int COUNT = 3;
 int programCode = 0;
+const String vingerEN[COUNT] = {"forefinger", "middle finger", "ring finger"};
 const String vinger[COUNT] = {"wijsvinger", "middelvinger", "ringvinger"};
 
 const int INPUTS[COUNT] = {8, 9, 10};
