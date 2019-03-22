@@ -154,17 +154,17 @@ void loop() {
         if (LANG_OUTPUT == LANG_NL) Serial.print("Ontvangen ");
         else Serial.print("Received ");
         Serial.println(programCode);
-        procesCommand(programCode-1);
+        programActionForVinger(programCode-1);
         displayMenu();
       }
     }
   }
   
   // react if a button (=closing finger) is pushed
-  procesInputs();
+  processInputs();
 }
 
-void procesCommand(int code) {
+void programActionForVinger(int code) {
   // we make us ready to receive signals
   myReceiver.enableIRIn(); // Start the receiver. This uses interrupt code, so we can use delay!
   delay(1000);
@@ -241,7 +241,7 @@ void storeCode(int codeIndex) {
 }
 
 
-void procesInputs() {
+void processInputs() {
   for (int i = 0; i < COUNT; i++) {
     if (digitalRead(INPUTS[i]) == LOW) {
       if (TEST_WITH_SERIAL) {
