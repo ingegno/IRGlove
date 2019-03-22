@@ -10,16 +10,67 @@ Code is gebaseerd op record.ino van [IRLib2](https://github.com/cyborg5/IRLib2) 
 ## Constructie
 We doen volgende wijzigingen tov het Phalabs project
 * gebruik Arduino Nano
-* voeg een OLED scherm toe
-* voeg een drukknop toe
+* gebruik Arduino Nano houder
+* componenten bevestigen aan de Nano houder
 
 # Handleiding
 
 ## Constructie op Breadboad
-Maak eerst de constructie op een breadboard. Daarna laden we de code op naar de Arduino, en testen.
+Maak indien gewenst eerst de constructie op een breadboard. Daarna kun je al de code flashen naar de Arduino, en testen.
 
-*Hier komt foto schema en breadboard constructie*
 ![circuit](doc/fig/IRGlove_Circuit.png)
+
+## Constructie Foto Handleiding
+
+### Electronisch circuit
+
+We beginnen met de electronica klaarmaken. 
+
+**Stap 1** 
+
+![stap01](doc/fig/construction_01.png)
+
+
+**Stap 2** 
+
+![stap02](doc/fig/construction_02.png)
+
+
+**Stap 3** 
+
+![stap03](doc/fig/construction_03.png)
+
+
+**Stap 4** 
+
+![stap04](doc/fig/construction_04.png)
+
+
+**Stap 5** 
+
+![stap05](doc/fig/construction_05.png)
+
+
+**Stap 6** 
+
+![stap06](doc/fig/construction_06.png)
+
+
+**Stap 7** 
+
+![stap07](doc/fig/construction_07.png)
+
+**Stap 8** 
+
+![stap08](doc/fig/construction_08.png)
+
+**Stap 9** 
+
+![stap09](doc/fig/construction_09.png)
+
+### Handschoen
+
+De handschoen kun je nu maken of eerst de code installeren om te testen.
 
 ## Code Installeren
 
