@@ -21,6 +21,21 @@
 // select language of the output in serial monitor
 #define LANG_OUTPUT LANG_NL
 
+// set the fingers you will use
+const int COUNT = 3;
+const String vinger_EN[COUNT] = {"forefinger", "middle finger", "ring finger"};
+const String vinger[COUNT] = {"wijsvinger", "middelvinger", "ringvinger"};
+// pins on the Arduino for the fingers:
+const int INPUTS[COUNT] = {8, 9, 10};
+
+// optional pin to program
+const int PROGRAM_PIN = 7;
+
+// pin used by the IR receiver
+const int IR_RECEIVE_PIN = 12;
+
+// pin used by the IR sender is based on your hardware. UNO and NANO are pin 3
+// for other boards look up the pin in IRLibProtocols/IRLibHardware.h of the library!
 
 /*  CODE 
  *   
@@ -35,7 +50,6 @@ const int memBase          = 120;
 
 #include <IRLibDecodeBase.h>  //We need both the coding and
 #include <IRLibSendBase.h>    // sending base classes
-// we don't need to understand what is send, only be able to reproduce it!
 #include <IRLib_P01_NEC.h>    //Lowest numbered protocol 1st
 #include <IRLib_P02_Sony.h>   // Include only protocols you want
 #include <IRLib_P03_RC5.h>
@@ -54,30 +68,19 @@ IRsend mySender;
 
 // Include a receiver either this or IRLibRecvPCI or IRLibRecvLoop
 #include <IRLibRecv.h>
-IRrecv myReceiver(12); //pin number for the receiver
+IRrecv myReceiver(IR_RECEIVE_PIN); //pin number for the receiver
 
-const int COUNT = 3;
 int programCode = 0;
-const String vinger_EN[COUNT] = {"forefinger", "middle finger", "ring finger"};
-const String vinger[COUNT] = {"wijsvinger", "middelvinger", "ringvinger"};
-
-const int INPUTS[COUNT] = {8, 9, 10};
-const int PROGRAM_PIN = 7;
 
 // Storage for the recorded code
 uint8_t codeProtocol[COUNT] = {0};  // The type of code
 uint32_t codeValue[COUNT] = {0};    // The data bits if type is not raw
 uint8_t codeBits[COUNT] = {0};      // The length of the code in bits
 
-//These flags keep track of whether we received the first code
-//and if we have have received a new different code from a previous one.
-bool gotOne, gotNew;
 
 void setup() {
-  //gotOne = false; gotNew = false;
-  //EEPROM_readAnything(0, configuration);
   // start reading from position memBase (address 0) of the EEPROM. Set maximumSize to EEPROMSizeUno 
-  // Writes before membase or beyond EEPROMSizeUno will only give errors when _EEPROMEX_DEBUG is set
+  // Writes before membase or beyond EEPROMSize will only give errors when _EEPROMEX_DEBUG is set
   if (IRGLOVE_BOARD == B_NANO) {
     EEPROM.setMemPool(memBase, EEPROMSizeNano);
   } else {
@@ -98,8 +101,7 @@ void setup() {
   // obtain last stored values from EEPROM memory after startup
   for (int i = 0; i < COUNT; i++) {
     pinMode(INPUTS[i], INPUT_PULLUP);
-    //Inlezen van EEPROM
-    
+    //read in stored data from EEPROM
     codeValue[i] = EEPROM.readLong(i*50);
     codeBits[i] = EEPROM.readByte((i*50)+32);
     codeProtocol[i] = EEPROM.readByte((i*50)+40);
@@ -134,42 +136,6 @@ void displayMenu() {
     }
   }
   Serial.println();
-}
-
-void sendCode(int codeIndex) {
-//  // Following toggle bits, see https://learn.adafruit.com/using-an-infrared-library/hardware-needed#rc5-and-rc6-toggle-bits-3-12
-//  if ( !gotNew ) { //We've already sent this so handle toggle bits
-//    if (codeProtocol[codeIndex] == RC5) {
-//      codeValue[codeIndex] ^= 0x0800;
-//    }
-//    else if (codeProtocol[codeIndex] == RC6) {
-//      switch (codeBits[codeIndex]) {
-//        case 20: codeValue[codeIndex] ^= 0x10000; break;
-//        case 24: codeValue[codeIndex] ^= 0x100000; break;
-//        case 28: codeValue[codeIndex] ^= 0x1000000; break;
-//        case 32: codeValue[codeIndex] ^= 0x8000; break;
-//      }
-//    }
-//  }
-//  gotNew = false;
-//  if (codeProtocol[codeIndex] == UNKNOWN) {
-//    //The raw time values start in decodeBuffer[1] because
-//    //the [0] entry is the gap between frames. The address
-//    //is passed to the raw send routine.
-//    codeValue[codeIndex] = (uint32_t) & (recvGlobal.decodeBuffer[1]);
-//    //This isn't really number of bits. It's the number of entries
-//    //in the buffer.
-//    codeBits[codeIndex] = recvGlobal.decodeLength - 1;
-//    Serial.println(F("Sent raw"));
-//  }
-  // send the raw data we stored!
-  mySender.send(codeProtocol[codeIndex], codeValue[codeIndex], codeBits[codeIndex]);
-  if (LANG_OUTPUT == LANG_NL) Serial.print(F("Stuurde "));
-  else Serial.print(F("Sent "));
-  if (codeProtocol[codeIndex] != UNKNOWN) Serial.print(Pnames(codeProtocol[codeIndex]));
-  if (LANG_OUTPUT == LANG_NL) Serial.print(F(" Waarde:0x"));
-  else Serial.print(F(" Value:0x"));
-  Serial.println(codeValue[codeIndex], HEX);
 }
 
 void loop() {
@@ -268,4 +234,14 @@ void procesInputs() {
       delay(100);
     }
   }
+}
+void sendCode(int codeIndex) {
+  // send the raw data we stored!
+  mySender.send(codeProtocol[codeIndex], codeValue[codeIndex], codeBits[codeIndex]);
+  if (LANG_OUTPUT == LANG_NL) Serial.print(F("Stuurde "));
+  else Serial.print(F("Sent "));
+  if (codeProtocol[codeIndex] != UNKNOWN) Serial.print(Pnames(codeProtocol[codeIndex]));
+  if (LANG_OUTPUT == LANG_NL) Serial.print(F(" Waarde:0x"));
+  else Serial.print(F(" Value:0x"));
+  Serial.println(codeValue[codeIndex], HEX);
 }
