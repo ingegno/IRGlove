@@ -5,6 +5,31 @@
  *      - correct store of signals
  *      
 */
+
+/*  USER SETTINGS 
+ *   
+*/
+// board selection
+#define B_UNO 0
+#define B_NANO 1
+// do you use an UNO or a NANO for the glove ? 
+#define IRGLOVE_BOARD B_NANO
+
+// select language
+#define LANG_EN 0
+#define LANG_NL 1
+// select language of the output in serial monitor
+#define LANG_OUTPUT LANG_NL
+
+
+/*  CODE 
+ *   
+*/
+
+const int maxAllowedWrites = 80;
+// start reading from the first byte (address 120) of the EEPROM
+const int memBase          = 120;
+
 #include <EEPROMex.h>
 #include <EEPROMVar.h>
 
@@ -33,15 +58,15 @@ IRrecv myReceiver(12); //pin number for the receiver
 
 const int COUNT = 3;
 int programCode = 0;
-const String vingerEN[COUNT] = {"forefinger", "middle finger", "ring finger"};
+const String vinger_EN[COUNT] = {"forefinger", "middle finger", "ring finger"};
 const String vinger[COUNT] = {"wijsvinger", "middelvinger", "ringvinger"};
 
 const int INPUTS[COUNT] = {8, 9, 10};
 const int PROGRAM_PIN = 7;
 
 // Storage for the recorded code
-uint8_t codeProtocol;  // The type of code
-uint32_t codeValue[COUNT] = {0}; // The data bits if type is not raw
+uint8_t codeProtocol[COUNT] = {0};  // The type of code
+uint32_t codeValue[COUNT] = {0};    // The data bits if type is not raw
 uint8_t codeBits[COUNT] = {0};      // The length of the code in bits
 
 //These flags keep track of whether we received the first code
@@ -50,24 +75,43 @@ bool gotOne, gotNew;
 
 void setup() {
   //gotOne = false; gotNew = false;
-  codeProtocol = UNKNOWN;
-  //codeValue = 0;
   //EEPROM_readAnything(0, configuration);
+  // start reading from position memBase (address 0) of the EEPROM. Set maximumSize to EEPROMSizeUno 
+  // Writes before membase or beyond EEPROMSizeUno will only give errors when _EEPROMEX_DEBUG is set
+  if (IRGLOVE_BOARD == B_NANO) {
+    EEPROM.setMemPool(memBase, EEPROMSizeNano);
+  } else {
+    EEPROM.setMemPool(memBase, EEPROMSizeUno);
+  }
+  // Set maximum allowed writes to maxAllowedWrites. 
+  // More writes will only give errors when _EEPROMEX_DEBUG is set
+  EEPROM.setMaxAllowedWrites(maxAllowedWrites);
+  delay(100);
+  
 
   Serial.begin(9600);
+  
+  while (!Serial) {
+    ; // wait for serial port to connect. Needed for native USB port only
+  }
+  
   // obtain last stored values from EEPROM memory after startup
   for (int i = 0; i < COUNT; i++) {
     pinMode(INPUTS[i], INPUT_PULLUP);
     //Inlezen van EEPROM
+    
     codeValue[i] = EEPROM.readLong(i*50);
-    codeBits[i] = EEPROM.readByte((i*50)+40);
+    codeBits[i] = EEPROM.readByte((i*50)+32);
+    codeProtocol[i] = EEPROM.readByte((i*50)+40);
+    if (LANG_OUTPUT == LANG_NL) Serial.println("Gevonden commando's in EEPROM:");
+    else Serial.println("Found commands in EEPROM:");
+    Serial.print(i+1);Serial.print(" ");Serial.print(codeProtocol[i]);
+    Serial.print(" 0x");Serial.print(codeValue[i], HEX);
+    Serial.print(", bits 0x");Serial.println(codeBits[i], HEX);
   }
   // Program pin is a pushbutton or the pinky
   pinMode(PROGRAM_PIN, INPUT_PULLUP);
 
-  while (!Serial) {
-    ; // wait for serial port to connect. Needed for native USB port only
-  }
   displayMenu();
 }
 
@@ -75,64 +119,30 @@ void displayMenu() {
   Serial.println("GloveIR STEAMbox menu");
   Serial.println("*********************");
   for (int i = 0; i < COUNT; i++) {
-    Serial.print("Stuur via deze monitor nummer ");
-    Serial.print(i+1);
-    Serial.print(", om de code voor de ");
-    Serial.print(vinger[i]);
-    Serial.println(" op te nemen.");
+    if (LANG_OUTPUT == LANG_NL) {
+      Serial.print("Stuur via deze monitor nummer ");
+      Serial.print(i+1);
+      Serial.print(", om de code voor de ");
+      Serial.print(vinger[i]);
+      Serial.println(" op te nemen.");
+    } else {
+      Serial.print("Send via this monitor number ");
+      Serial.print(i+1);
+      Serial.print(", to record the code for the ");
+      Serial.print(vinger_EN[i]);
+      Serial.println(".");
+    }
   }
   Serial.println();
-}
-
-// Stores the code for later playback
-void storeCode(int codeIndex) {
-  //gotNew = true;    gotOne = true;
-  codeProtocol = myDecoder.protocolNum;
-  Serial.print(F("Received "));
-  Serial.print(Pnames(codeProtocol));
-  
-  if (codeProtocol == UNKNOWN) {
-    // print out the data
-    Serial.println(F(" saving raw data."));
-    myDecoder.dumpResults();
-
-    //clean up data as needed
-    //The raw time values start in decodeBuffer[1] because
-    //the [0] entry is the gap between frames. The address
-    //is passed to the raw send routine.
-    codeValue[codeIndex] = (uint32_t) & (recvGlobal.decodeBuffer[1]);
-    //This isn't really number of bits. It's the number of entries
-    //in the buffer.
-    codeBits[codeIndex] = recvGlobal.decodeLength - 1;
-//    codeValue[codeIndex] = myDecoder.value;
-//    codeBits[codeIndex] = myDecoder.bits;
-    //updaten van EEPROM
-    EEPROM.updateLong(codeIndex*50, codeValue[codeIndex]);
-    EEPROM.updateByte((codeIndex*50)+40, codeBits[codeIndex]);
-  }
-  else {
-    if (myDecoder.value == REPEAT_CODE) {
-      // Don't record a NEC repeat value as that's useless.
-      Serial.println(F("repeat; ignoring."));
-    } else {
-      codeValue[codeIndex] = myDecoder.value;
-      codeBits[codeIndex] = myDecoder.bits;
-      //Updaten van EEPROM
-      EEPROM.updateLong(codeIndex*50, codeValue[codeIndex]);
-      EEPROM.updateByte((codeIndex*50)+40, codeBits[codeIndex]);
-    }
-    Serial.print(F(" Value:0x"));
-    Serial.println(codeValue[codeIndex], HEX);
-  }
 }
 
 void sendCode(int codeIndex) {
 //  // Following toggle bits, see https://learn.adafruit.com/using-an-infrared-library/hardware-needed#rc5-and-rc6-toggle-bits-3-12
 //  if ( !gotNew ) { //We've already sent this so handle toggle bits
-//    if (codeProtocol == RC5) {
+//    if (codeProtocol[codeIndex] == RC5) {
 //      codeValue[codeIndex] ^= 0x0800;
 //    }
-//    else if (codeProtocol == RC6) {
+//    else if (codeProtocol[codeIndex] == RC6) {
 //      switch (codeBits[codeIndex]) {
 //        case 20: codeValue[codeIndex] ^= 0x10000; break;
 //        case 24: codeValue[codeIndex] ^= 0x100000; break;
@@ -142,7 +152,7 @@ void sendCode(int codeIndex) {
 //    }
 //  }
 //  gotNew = false;
-//  if (codeProtocol == UNKNOWN) {
+//  if (codeProtocol[codeIndex] == UNKNOWN) {
 //    //The raw time values start in decodeBuffer[1] because
 //    //the [0] entry is the gap between frames. The address
 //    //is passed to the raw send routine.
@@ -153,11 +163,12 @@ void sendCode(int codeIndex) {
 //    Serial.println(F("Sent raw"));
 //  }
   // send the raw data we stored!
-  mySender.send(codeProtocol, codeValue[codeIndex], codeBits[codeIndex]);
-  if (codeProtocol == UNKNOWN) return;
-  Serial.print(F("Sent "));
-  Serial.print(Pnames(codeProtocol));
-  Serial.print(F(" Value:0x"));
+  mySender.send(codeProtocol[codeIndex], codeValue[codeIndex], codeBits[codeIndex]);
+  if (LANG_OUTPUT == LANG_NL) Serial.print(F("Stuurde "));
+  else Serial.print(F("Sent "));
+  if (codeProtocol[codeIndex] != UNKNOWN) Serial.print(Pnames(codeProtocol[codeIndex]));
+  if (LANG_OUTPUT == LANG_NL) Serial.print(F(" Waarde:0x"));
+  else Serial.print(F(" Value:0x"));
   Serial.println(codeValue[codeIndex], HEX);
 }
 
@@ -165,7 +176,8 @@ void loop() {
   if (Serial.available() > 0) {
     programCode = Serial.parseInt();   // returns 0 on failure/timeout!
     if (programCode >= 1 && programCode <= COUNT ) {
-      Serial.print("Received ");
+      if (LANG_OUTPUT == LANG_NL) Serial.print("Ontvangen ");
+      else Serial.print("Received ");
       Serial.println(programCode);
       procesCommand(programCode-1);
       displayMenu();
@@ -180,24 +192,77 @@ void procesCommand(int code) {
   myReceiver.enableIRIn(); // Start the receiver. This uses interrupt code, so we can use delay!
   delay(1000);
   // we write on Serial what user has to do
-  Serial.println("Houd de IR-afstandsbediening voor de ontvanger en druk je commando in..");
+  if (LANG_OUTPUT == LANG_NL)  Serial.println("Houd de IR-afstandsbediening voor de ontvanger en druk je commando in..");
+  else  Serial.println("Hold the IR-remote in front of the receiver and press the button with your command..");
   // loop tot resultaten binnen zijn
   do {
     delay(1000);
-    Serial.println("Nog niets ontvangen");
+    if (LANG_OUTPUT == LANG_NL)  Serial.println("Nog niets ontvangen");
+    else Serial.println("Nothing received yet...");
   } while (!myReceiver.getResults());
   // decodeer signaal
   myDecoder.decode();
   // sla signaal op
   storeCode(code);
-  Serial.print("Code opgeslagen als signaal: ");
+  if (LANG_OUTPUT == LANG_NL)  Serial.print("Code opgeslagen als signaal: ");
+  else Serial.print("Code saved as signal: ");
   Serial.println(code+1);
 }
+
+
+// Stores the code for later playback
+void storeCode(int codeIndex) {
+  //gotNew = true;    gotOne = true;
+  codeProtocol[codeIndex] = myDecoder.protocolNum;
+  if (LANG_OUTPUT == LANG_NL) Serial.print(F("Ontvangen "));
+  else Serial.print(F("Received "));
+  Serial.print(Pnames(codeProtocol[codeIndex]));
+  
+  if (codeProtocol[codeIndex] == UNKNOWN) {
+    // print out the data
+    if (LANG_OUTPUT == LANG_NL) Serial.println(F(" ruwe data opgelagen."));
+    else Serial.println(F(" saving raw data."));
+    myDecoder.dumpResults();
+
+    //clean up data as needed
+    //The raw time values start in decodeBuffer[1] because
+    //the [0] entry is the gap between frames. The address
+    //is passed to the raw send routine.
+    codeValue[codeIndex] = (uint32_t) & (recvGlobal.decodeBuffer[1]);
+    //This isn't really number of bits. It's the number of entries
+    //in the buffer.
+    codeBits[codeIndex] = recvGlobal.decodeLength - 1;
+//    codeValue[codeIndex] = myDecoder.value;
+//    codeBits[codeIndex] = myDecoder.bits;
+    //updaten van EEPROM
+    EEPROM.updateLong(codeIndex*50, codeValue[codeIndex]);
+    EEPROM.updateByte((codeIndex*50)+32, codeBits[codeIndex]);
+    EEPROM.updateByte((codeIndex*50)+40, codeProtocol[codeIndex]);
+  }
+  else {
+    if (myDecoder.value == REPEAT_CODE) {
+      // Don't record a NEC repeat value as that's useless.
+      if (LANG_OUTPUT == LANG_NL)  Serial.println(F("herhalingscommando; genegeerd."));
+      else Serial.println(F("repeat; ignoring."));
+    } else {
+      codeValue[codeIndex] = myDecoder.value;
+      codeBits[codeIndex] = myDecoder.bits;
+      //Updaten van EEPROM
+      EEPROM.updateLong(codeIndex*50, codeValue[codeIndex]);
+      EEPROM.updateByte((codeIndex*50)+32, codeBits[codeIndex]);
+      EEPROM.updateByte((codeIndex*50)+40, codeProtocol[codeIndex]);
+    }
+    Serial.print(F(" Value:0x"));
+    Serial.println(myDecoder.value, HEX);
+  }
+}
+
 
 void procesInputs() {
   for (int i = 0; i < COUNT; i++) {
     if (digitalRead(INPUTS[i]) == LOW) {
-      Serial.print("Sending out code ");
+      if (LANG_OUTPUT == LANG_NL)  Serial.print("Stuur nu code ");
+      else Serial.print("Sending out code ");
       Serial.println(i+1);
       sendCode(i);
       delay(100);
