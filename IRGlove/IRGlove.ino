@@ -37,6 +37,9 @@ const int IR_RECEIVE_PIN = 12;
 // pin used by the IR sender is based on your hardware. UNO and NANO are pin 3
 // for other boards look up the pin in IRLibProtocols/IRLibHardware.h of the library!
 
+// set serial output on or off
+#define TEST_WITH_SERIAL false
+
 /*  CODE 
  *   
 */
@@ -91,11 +94,12 @@ void setup() {
   EEPROM.setMaxAllowedWrites(maxAllowedWrites);
   delay(100);
   
-
-  Serial.begin(9600);
-  
-  while (!Serial) {
-    ; // wait for serial port to connect. Needed for native USB port only
+  if (TEST_WITH_SERIAL) {
+    Serial.begin(9600);
+    
+    while (!Serial) {
+      ; // wait for serial port to connect. Needed for native USB port only
+    }
   }
   
   // obtain last stored values from EEPROM memory after startup
@@ -105,16 +109,19 @@ void setup() {
     codeValue[i] = EEPROM.readLong(i*50);
     codeBits[i] = EEPROM.readByte((i*50)+32);
     codeProtocol[i] = EEPROM.readByte((i*50)+40);
-    if (LANG_OUTPUT == LANG_NL) Serial.println("Gevonden commando's in EEPROM:");
-    else Serial.println("Found commands in EEPROM:");
-    Serial.print(i+1);Serial.print(" ");Serial.print(codeProtocol[i]);
-    Serial.print(" 0x");Serial.print(codeValue[i], HEX);
-    Serial.print(", bits 0x");Serial.println(codeBits[i], HEX);
+    
+    if (TEST_WITH_SERIAL) {
+      if (LANG_OUTPUT == LANG_NL) Serial.println("Gevonden commando's in EEPROM:");
+      else Serial.println("Found commands in EEPROM:");
+      Serial.print(i+1);Serial.print(" ");Serial.print(codeProtocol[i]);
+      Serial.print(" 0x");Serial.print(codeValue[i], HEX);
+      Serial.print(", bits 0x");Serial.println(codeBits[i], HEX);
+    }
   }
   // Program pin is a pushbutton or the pinky
   pinMode(PROGRAM_PIN, INPUT_PULLUP);
 
-  displayMenu();
+  if (TEST_WITH_SERIAL) displayMenu();
 }
 
 void displayMenu() {
@@ -139,16 +146,20 @@ void displayMenu() {
 }
 
 void loop() {
-  if (Serial.available() > 0) {
-    programCode = Serial.parseInt();   // returns 0 on failure/timeout!
-    if (programCode >= 1 && programCode <= COUNT ) {
-      if (LANG_OUTPUT == LANG_NL) Serial.print("Ontvangen ");
-      else Serial.print("Received ");
-      Serial.println(programCode);
-      procesCommand(programCode-1);
-      displayMenu();
+  if (TEST_WITH_SERIAL) {
+    // one can set commands using serial monitor input
+    if (Serial.available() > 0) {
+      programCode = Serial.parseInt();   // returns 0 on failure/timeout!
+      if (programCode >= 1 && programCode <= COUNT ) {
+        if (LANG_OUTPUT == LANG_NL) Serial.print("Ontvangen ");
+        else Serial.print("Received ");
+        Serial.println(programCode);
+        procesCommand(programCode-1);
+        displayMenu();
+      }
     }
   }
+  
   // react if a button (=closing finger) is pushed
   procesInputs();
 }
@@ -180,15 +191,19 @@ void procesCommand(int code) {
 void storeCode(int codeIndex) {
   //gotNew = true;    gotOne = true;
   codeProtocol[codeIndex] = myDecoder.protocolNum;
-  if (LANG_OUTPUT == LANG_NL) Serial.print(F("Ontvangen "));
-  else Serial.print(F("Received "));
-  Serial.print(Pnames(codeProtocol[codeIndex]));
+  if (TEST_WITH_SERIAL) {
+    if (LANG_OUTPUT == LANG_NL) Serial.print(F("Ontvangen "));
+    else Serial.print(F("Received "));
+    Serial.print(Pnames(codeProtocol[codeIndex]));
+  }
   
   if (codeProtocol[codeIndex] == UNKNOWN) {
-    // print out the data
-    if (LANG_OUTPUT == LANG_NL) Serial.println(F(" ruwe data opgelagen."));
-    else Serial.println(F(" saving raw data."));
-    myDecoder.dumpResults();
+    if (TEST_WITH_SERIAL) {
+      // print out the data
+      if (LANG_OUTPUT == LANG_NL) Serial.println(F(" ruwe data opgelagen."));
+      else Serial.println(F(" saving raw data."));
+      myDecoder.dumpResults();
+    }
 
     //clean up data as needed
     //The raw time values start in decodeBuffer[1] because
@@ -198,8 +213,6 @@ void storeCode(int codeIndex) {
     //This isn't really number of bits. It's the number of entries
     //in the buffer.
     codeBits[codeIndex] = recvGlobal.decodeLength - 1;
-//    codeValue[codeIndex] = myDecoder.value;
-//    codeBits[codeIndex] = myDecoder.bits;
     //updaten van EEPROM
     EEPROM.updateLong(codeIndex*50, codeValue[codeIndex]);
     EEPROM.updateByte((codeIndex*50)+32, codeBits[codeIndex]);
@@ -208,8 +221,10 @@ void storeCode(int codeIndex) {
   else {
     if (myDecoder.value == REPEAT_CODE) {
       // Don't record a NEC repeat value as that's useless.
-      if (LANG_OUTPUT == LANG_NL)  Serial.println(F("herhalingscommando; genegeerd."));
-      else Serial.println(F("repeat; ignoring."));
+      if (TEST_WITH_SERIAL) {
+        if (LANG_OUTPUT == LANG_NL)  Serial.println(F("herhalingscommando; genegeerd."));
+        else Serial.println(F("repeat; ignoring."));
+      }
     } else {
       codeValue[codeIndex] = myDecoder.value;
       codeBits[codeIndex] = myDecoder.bits;
@@ -218,8 +233,10 @@ void storeCode(int codeIndex) {
       EEPROM.updateByte((codeIndex*50)+32, codeBits[codeIndex]);
       EEPROM.updateByte((codeIndex*50)+40, codeProtocol[codeIndex]);
     }
-    Serial.print(F(" Value:0x"));
-    Serial.println(myDecoder.value, HEX);
+    if (TEST_WITH_SERIAL) {
+      Serial.print(F(" Value:0x"));
+      Serial.println(myDecoder.value, HEX);
+    }
   }
 }
 
@@ -227,9 +244,11 @@ void storeCode(int codeIndex) {
 void procesInputs() {
   for (int i = 0; i < COUNT; i++) {
     if (digitalRead(INPUTS[i]) == LOW) {
-      if (LANG_OUTPUT == LANG_NL)  Serial.print("Stuur nu code ");
-      else Serial.print("Sending out code ");
-      Serial.println(i+1);
+      if (TEST_WITH_SERIAL) {
+        if (LANG_OUTPUT == LANG_NL)  Serial.print("Stuur nu code ");
+        else Serial.print("Sending out code ");
+        Serial.println(i+1);
+      }
       sendCode(i);
       delay(100);
     }
@@ -238,10 +257,12 @@ void procesInputs() {
 void sendCode(int codeIndex) {
   // send the raw data we stored!
   mySender.send(codeProtocol[codeIndex], codeValue[codeIndex], codeBits[codeIndex]);
-  if (LANG_OUTPUT == LANG_NL) Serial.print(F("Stuurde "));
-  else Serial.print(F("Sent "));
-  if (codeProtocol[codeIndex] != UNKNOWN) Serial.print(Pnames(codeProtocol[codeIndex]));
-  if (LANG_OUTPUT == LANG_NL) Serial.print(F(" Waarde:0x"));
-  else Serial.print(F(" Value:0x"));
-  Serial.println(codeValue[codeIndex], HEX);
+  if (TEST_WITH_SERIAL) {
+    if (LANG_OUTPUT == LANG_NL) Serial.print(F("Stuurde "));
+    else Serial.print(F("Sent "));
+    if (codeProtocol[codeIndex] != UNKNOWN) Serial.print(Pnames(codeProtocol[codeIndex]));
+    if (LANG_OUTPUT == LANG_NL) Serial.print(F(" Waarde:0x"));
+    else Serial.print(F(" Value:0x"));
+    Serial.println(codeValue[codeIndex], HEX);
+  }
 }
