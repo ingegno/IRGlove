@@ -29,109 +29,105 @@ If you which, make first the construction on a breadboard. After this you can fl
 
 ## Construction Photo Manual
 
-### Electronisch circuit
+### Electronical circuit
 
-We beginnen met de electronica klaarmaken. 
+We start with preparing the electronics
 
-**Stap 1** 
+**Step 1** 
 
-Plaats de Nano op de Nano houder. Zorg dat pinnen juist zitten !
+Put the Nano on the Nano holder. Make sure the pin numbers are correct with those written on the holder !
 
-Maak draden die met de handschoen zullen verbinden voor de 5 fingers. Connecteer dan als volgt
+Make wires which we later will connect with the glove for the 5. Connect them as follows
 
-* duim: GND zoals op foto
-* wijsvinger: D10
-* middelvinger: D9
-* ringvinger: D8
+* thumb: GND as on the picture
+* forefinger: D10
+* middel finger: D9
+* ring finger: D8
 * pink: D7
 
 ![stap01](doc/fig/construction_01.png)
 
-**Stap 2** 
+**Step 2** 
 
-De 9V batterijhouder connecteer je met Vin en GND aan de andere kant. Opgelet, Vin is **ROOD**.
+The 9V battery holder must be connected with Vin and GND at the other side. Careful, Vin is **RED**.
 
 ![stap02](doc/fig/construction_02.png)
 
 
-**Stap 3** 
+**Step 3** 
 
-Soldeer de 330 Ohm weerstand aan middelste beentje van de transistor zoals op de foto. Dus, aan de platte kant
-van de transistor!
+Solder the 330 Ohm resistor to the middle leg of the transistor as in the picture foto. So, over the flat side of the transistor!
 
 ![stap03](doc/fig/construction_03.png)
 
-**Stap 4** 
+**Step 4** 
 
-Bescherm nu middelste beentje transistor met een krimpkous.
+Protect now the middle leg of the transistor with a heat shrink tubing.
 
-Aan de *linkerkant* (als je kijkt op platte kant transistor) soldeer je de 10 Ohm weerstand. En daaraan dan een draad
-die lang genoeg is om tot aan de knokels van je hand te lopen.
+On the *left side* (looking on the flat side of the transistor) solder now the 10 Ohm resistor. To that solder then a wire sufficiently long to reach the knuckles of your hand when installed.
 
 ![stap04](doc/fig/construction_04.png)
 
 
-**Stap 5** 
+**Step 5** 
 
-Soldeer einde van die draad nu aan **korste** beentje van de IR LED (onze *zender*). Bescherm met krimpkous.
+Solder now the end of this wire to the **shortest** leg of the IR LED (our *transmitter*). Protect with heat shrink tubing.
 
 ![stap05](doc/fig/construction_05.png)
 
-Het lange beentje van de IR LED is de +. Neem dan ook een **rode** draad, en soldeer hem eraan. Knip beentje LED
-eerst wat korter dat je niet teveel krimpkous nodig hebt
+The long leg of the IR LED is the +. So take a **red** wire, and solder it to this leg. Shorten the LED leg
+first somewhat so you don't need much heat shrink tubing to protect it.
 
-**Stap 6** 
+**Step 6** 
 
-De rode draad van de IR LED stop je in de 5V van de NANO houder **samen** met **rechter** been van de IR ontvanger
-(rechts als je kijkt naar de uitstulping).
+The red zire of the IR LED you screw to the 5V of the NANO holder **together** with the **right** leg of the IR receiver
+(right side when looking at the protrusion on the receiver).
 
 ![stap06](doc/fig/construction_06.png)
 
 
-**Stap 7** 
+**Step 7** 
 
-Om kortsluiting te vermijden, doe krimpkous over bovenkant van middelste been IR ontvangen, en stop deze dan, na 
-plooien in de GND van de Arduino houder
+To qvoid short circuit, apply heat shrink tubing on the middle leg of the IR receiver and put this middle leg then, after bending; in the GND of the Arduino holder. The receiver should stick out so you can easily point to it with a telecommand
 
 ![stap07](doc/fig/construction_07.png)
 
-Buig linkse been IR ontvanger naar achter.
+Bend the left leg of the IR receiver backwards
 
-**Stap 8** 
+**Step 8** 
 
-Soldeer een draad aan linkse been IR ontvanger, en bevestig andere uiteinde aan pin D12.
+Solder a wire to the left leg of the IR receiver, and connect the othe side to pin D12.
 
 ![stap08](doc/fig/construction_08.png)
 
-**Stap 9** 
+**Step 9** 
 
-Je hebt nu enkel nog de transistor die los zit. De *rechterkant* (als je kijkt op platte kant transistor) van de 
-transistor moet in de GND, terwijl uiteinde van de 330 Ohm weerstand in pin D3 moet. Dat moet normaal
-lukken zoals op volgende foto:
+You are only left with the transistor which is not fully connected yet. The *right side* (when looking at the flat side of the transistor) of the 
+transistor must go to GND, while the end of the 330 Ohm resistor you connected earlier must go in pin D3 moet. 
+You should be able to this like on the following picture:
 
 ![stap09](doc/fig/construction_09.png)
 
-**Stap 10**
-Je circuit is af. We moeten nu de vingers bevestigen aan de handschoen, en de IR LED plaatsen waar we signalen 
-willen uitsturen. Het geheel zou er als volgt uit moeten zien:
+**Step 10**
+Your circuit is finished. We must now connect the vingers to the glove, and place the IR LED where we want the signals to be emitted fromf. The finished circuit should look like this:
 
 ![stap10](doc/fig/construction_10.png)
 
-### Handschoen
+### Glove
 
-De handschoen kun je nu maken of eerst de code installeren om te testen.
+The glove can now be made, or you install first the code to test the device.
 
-## Code Installeren
+## Install Code 
 
-### Benodigdheden
-Installeer op je computer de Arduino IDE 1.8.8. 
+### Requirements
+Install first on your PC Arduino IDE 1.8.8. 
 
-Installeer dan via de library manager (`CTRL+SHIFT+I`) volgende bibliotheek:
-* EEPROMEx versie 1.0.0 van Thijs Elenbaas
+Install then via the library manager (`CTRL+SHIFT+I`) following library:
+* EEPROMEx version 1.0.0 of Thijs Elenbaas
 
 ![Install EEPROMex](doc/fig/EEPROMex_lib.png)
 
-Vervolgens download via deze link [IRLib2](https://github.com/cyborg5/IRLib2) via de **Download Zip** knop (Wij gebruiken versie 3 Jun 2018). VOEG HIER SCREENSHOT TOE
+Next, download via this link [IRLib2](https://github.com/cyborg5/IRLib2) via the **Download Zip** button (We used version 3 Jun 2018). VOEG HIER SCREENSHOT TOE
 Unzip de download, en kopieer **een deel** van de Download naar de Arduino library folder zodat deze volgende structuur heeft: 
 
     Arduino/libraries/IRLib2
