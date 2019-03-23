@@ -1,17 +1,24 @@
 # IRGlove
-Adaptatie van de GloveIR arduino code: a handschoen om IR toestellen te controleren.
+
+Hier beschrijven een adaptatie van het GloveIR project van Phablabs: een handschoen om IR bestuurbare toestellen te controleren.
+
+**English**: See [English Manual](README_EN.md) - Here we describe an adaptation of the GloveIR project of Phablabs: a glove to control IR enabled devices
 
 ## Base project
+
+Het originele phablabs project vindt je hier terug: 
+
 * [Phablabs.eu ir-glove project](http://phablabs.eu/workshop/ir-glove)
 * [PDF Constructie handleiding](http://phablabs.eu/sites/default/files/Photonics%20IRglove_online_0.pdf)
 
-Code is gebaseerd op record.ino van [IRLib2](https://github.com/cyborg5/IRLib2) welke GPL v3 is, dus deze code is ook GPL v3
+De Code is gebaseerd op `record.ino` van [IRLib2](https://github.com/cyborg5/IRLib2) welke GPL v3 is, dus deze handleiding is ook onder Licentie GPL v3.
 
 ## Constructie
 We doen volgende wijzigingen tov het Phalabs project
 * gebruik Arduino Nano
 * gebruik Arduino Nano houder
-* componenten bevestigen aan de Nano houder
+* componenten bevestigen rechtstreeks aan de Nano houder
+* stand-alone versie: handschoen kan IR opnemen en afspelen zonder dat een PC nodig is
 
 # Handleiding
 
@@ -132,9 +139,9 @@ Unzip de download, en kopieer **een deel** van de Download naar de Arduino libra
 
 Op Windows is dit normaal in locatie `C:\Users\USERNAME\Documents\Arduino`, op linux in `\home\USERNAME\Arduino`.
 
-### IRGlove code
+### IRGlove code - Standaard Code
+#### Installatie
 Download de code van deze git via de **Download zip** knop en unzip de download. 
-SCREENSHOT
 Dubbel klik op de `IRGlove-master/IRGlove/IRGlove.ino` file in de unzipped code folder. Dit zal Arduino 1.8.8 openen op onze code. 
 
 Selecteer als bord Arduino Nano. Druk op compileer om te code te verifieren. 
@@ -155,3 +162,43 @@ dan dien je oplossing uit [deze thread](https://forum.arduino.cc/index.php?topic
     Click "Close".
 
 Na dit project kun je opnieuw de laatste versie van de *Arduino AVR Boards* installeren.
+
+Laad de code op je Arduino Nano.
+
+#### Werking Code
+De code werkt volgens een *state machine*, in het Nederlands *Eindigetoestandsautomaat*. Is het de eerste keer dat je de code oplaad, dan moet je nog programmeren wat de vingers moeten doen. 
+
+De toestanden van de code zijn als volgt:
+
+![finite state machine](doc/IRGlove%20-%20state%20machine%20-%20NL.png)
+
+Je gebruikt dus de pink (verbonden aan pin 7 van de Arduino) om tussen de toestanden te schakelen, kiest de vinger die je wil programmeren, en stuurt een IR bericht om dit op te slaat. Kijk naar de interne LED om te weten in welke toestand de Arduino Nano zich bevindt.
+
+### IRGlove code - Test Code
+#### Installatie
+Download de code van deze git via de **Download zip** knop en unzip de download. 
+Dubbel klik op de `IRGlove-master/IRGlove_SerialProgrammed/IRGlove_SerialProgrammed.ino` file in de unzipped code folder. Dit zal Arduino 1.8.8 openen op onze code. 
+
+Selecteer als bord Arduino Nano. Druk op compileer om te code te verifieren. 
+
+Krijg je de fout:
+
+    lto1: internal compiler error: in lto_output_varpool_node, at lto-cgraph.c:624
+    Please submit a full bug report,
+    with preprocessed source if appropriate.
+
+volg dan de oplossing hierboven gegeven bij standaard code.
+
+#### Werking
+Bij de test code hou je de Arduino Nano verbonden met de PC, en open je de Seriele monitor. Je kan via de seriele monitor de opdracht doorgeven om IR signalen op te slaan. Je krijgt feedback op de seriele monitor van ontvangen IR codes en uitgestuurde IR codes. Dit helpt je in begrijpen of een bepaalde IR code correct geinterpreteerd wordt door de code.
+
+Merk op dat dit deel van de code ook beschikbaar is in de standaard code. Om de seriele monitor aan te schakelen voor de standaard code dien je enkel volgende lijn te zoeken in de `.ino` file
+
+    // set serial output on or off
+    #define TEST_WITH_SERIAL false
+
+en wijzigen in 
+
+    // set serial output on or off
+    #define TEST_WITH_SERIAL true
+
