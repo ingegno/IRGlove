@@ -188,6 +188,8 @@ Terwijl gewacht wordt om een vinger te kiezen om te programmeren flikkert de LED
 
 Zodra een code ontvangen is, schakelt de LED weer uit.
 
+Wil je weten hoe deze eindigetoestandsautomaat geprogrammeerd werd? De basis werd in onze blokkencode gemaakt en dan geintegreerd in de code. Je kan de automaat bekijken via [onze blokkencode](http://blokkencode.ingegno.be/) waar je volgende xml moet opladen: [ProgramStates.xml](doc/ProgramStates.xml)
+
 ### IRGlove code - Test Code
 #### Installatie
 Download de code van deze git via de **Download zip** knop en unzip de download. 
