@@ -1,17 +1,24 @@
 # IRGlove
-Adaptatie van de GloveIR arduino code: a handschoen om IR toestellen te controleren.
+
+Hier beschrijven een adaptatie van het GloveIR project van Phablabs: een handschoen om IR bestuurbare toestellen te controleren.
+
+**English**: See [English Manual](README_EN.md) - Here we describe an adaptation of the GloveIR project of Phablabs: a glove to control IR enabled devices
 
 ## Base project
+
+Het originele phablabs project vindt je hier terug: 
+
 * [Phablabs.eu ir-glove project](http://phablabs.eu/workshop/ir-glove)
 * [PDF Constructie handleiding](http://phablabs.eu/sites/default/files/Photonics%20IRglove_online_0.pdf)
 
-Code is gebaseerd op record.ino van [IRLib2](https://github.com/cyborg5/IRLib2) welke GPL v3 is, dus deze code is ook GPL v3
+De Code is gebaseerd op `record.ino` van [IRLib2](https://github.com/cyborg5/IRLib2) welke GPL v3 is, dus deze handleiding is ook onder Licentie GPL v3.
 
 ## Constructie
 We doen volgende wijzigingen tov het Phalabs project
 * gebruik Arduino Nano
 * gebruik Arduino Nano houder
-* componenten bevestigen aan de Nano houder
+* componenten bevestigen rechtstreeks aan de Nano houder
+* stand-alone versie: handschoen kan IR opnemen en afspelen zonder dat een PC nodig is
 
 # Handleiding
 
