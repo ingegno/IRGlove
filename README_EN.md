@@ -1,26 +1,33 @@
 # IRGlove
-Adaptatie van de GloveIR arduino code: a handschoen om IR toestellen te controleren.
+
+Here we describe an adaptation of the GloveIR project of Phablabs: a glove to control IR enabled devices
+
+**Dutch**: See [Dutch Manual](README.md) 
 
 ## Base project
+
+The original phablabs project can be found here: 
+
 * [Phablabs.eu ir-glove project](http://phablabs.eu/workshop/ir-glove)
-* [PDF Constructie handleiding](http://phablabs.eu/sites/default/files/Photonics%20IRglove_online_0.pdf)
+* [PDF Construction manual](http://phablabs.eu/sites/default/files/Photonics%20IRglove_online_0.pdf)
 
-Code is gebaseerd op record.ino van [IRLib2](https://github.com/cyborg5/IRLib2) welke GPL v3 is, dus deze code is ook GPL v3
+The Code is based on `record.ino` of [IRLib2](https://github.com/cyborg5/IRLib2) which is GPL v3, so this manual is also under licence GPL v3.
 
-## Constructie
-We doen volgende wijzigingen tov het Phalabs project
-* gebruik Arduino Nano
-* gebruik Arduino Nano houder
-* componenten bevestigen aan de Nano houder
+## Construction
+We do following changes to the Phalabs project
+* use Arduino Nano
+* use Arduino Nano holder
+* components attached directly to the Nano holder
+* stand-alone version: glove can record and send IR without the need of a PC
 
-# Handleiding
+# Manual
 
-## Constructie op Breadboad
-Maak indien gewenst eerst de constructie op een breadboard. Daarna kun je al de code flashen naar de Arduino, en testen.
+## Construction on Breadboad
+If you which, make first the construction on a breadboard. After this you can flash the code to the Arduino and test
 
 ![circuit](doc/fig/IRGlove_Circuit.png)
 
-## Constructie Foto Handleiding
+## Construction Photo Manual
 
 ### Electronisch circuit
 
@@ -104,8 +111,11 @@ lukken zoals op volgende foto:
 
 ![stap09](doc/fig/construction_09.png)
 
+**Stap 10**
 Je circuit is af. We moeten nu de vingers bevestigen aan de handschoen, en de IR LED plaatsen waar we signalen 
-willen uitsturen.
+willen uitsturen. Het geheel zou er als volgt uit moeten zien:
+
+![stap10](doc/fig/construction_10.png)
 
 ### Handschoen
 
@@ -132,9 +142,9 @@ Unzip de download, en kopieer **een deel** van de Download naar de Arduino libra
 
 Op Windows is dit normaal in locatie `C:\Users\USERNAME\Documents\Arduino`, op linux in `\home\USERNAME\Arduino`.
 
-### IRGlove code
+### IRGlove code - Standaard Code
+#### Installatie
 Download de code van deze git via de **Download zip** knop en unzip de download. 
-SCREENSHOT
 Dubbel klik op de `IRGlove-master/IRGlove/IRGlove.ino` file in de unzipped code folder. Dit zal Arduino 1.8.8 openen op onze code. 
 
 Selecteer als bord Arduino Nano. Druk op compileer om te code te verifieren. 
@@ -155,3 +165,54 @@ dan dien je oplossing uit [deze thread](https://forum.arduino.cc/index.php?topic
     Click "Close".
 
 Na dit project kun je opnieuw de laatste versie van de *Arduino AVR Boards* installeren.
+
+Laad de code op je Arduino Nano.
+
+#### Werking Code
+De code werkt volgens een *state machine*, in het Nederlands *Eindigetoestandsautomaat*. Is het de eerste keer dat je de code oplaad, dan moet je nog programmeren wat de vingers moeten doen. 
+
+De toestanden van de code zijn als volgt:
+
+![finite state machine](doc/IRGlove%20-%20state%20machine%20-%20NL.png)
+
+Je gebruikt dus de pink (verbonden aan pin 7 van de Arduino) om tussen de toestanden te schakelen, kiest de vinger die je wil programmeren, en stuurt een IR bericht om dit op te slaat. Kijk naar de interne LED om te weten in welke toestand de Arduino Nano zich bevindt.
+
+De LED is uit in de normale werking als codes uitgestuurd worden. Dit betekend dat enkel de POWER LED brandt:
+
+![finite state machine](doc/fig/program01.png)
+
+Terwijl gewacht wordt om een vinger te kiezen om te programmeren flikkert de LED aan en uit. Als er gewacht wordt op een IR code van een telecommando, zal de LED aan zijn.
+
+
+![finite state machine](doc/fig/program02.png)
+
+Zodra een code ontvangen is, schakelt de LED weer uit.
+
+### IRGlove code - Test Code
+#### Installatie
+Download de code van deze git via de **Download zip** knop en unzip de download. 
+Dubbel klik op de `IRGlove-master/IRGlove_SerialProgrammed/IRGlove_SerialProgrammed.ino` file in de unzipped code folder. Dit zal Arduino 1.8.8 openen op onze code. 
+
+Selecteer als bord Arduino Nano. Druk op compileer om te code te verifieren. 
+
+Krijg je de fout:
+
+    lto1: internal compiler error: in lto_output_varpool_node, at lto-cgraph.c:624
+    Please submit a full bug report,
+    with preprocessed source if appropriate.
+
+volg dan de oplossing hierboven gegeven bij standaard code.
+
+#### Werking
+Bij de test code hou je de Arduino Nano verbonden met de PC, en open je de Seriele monitor. Je kan via de seriele monitor de opdracht doorgeven om IR signalen op te slaan. Je krijgt feedback op de seriele monitor van ontvangen IR codes en uitgestuurde IR codes. Dit helpt je in begrijpen of een bepaalde IR code correct geinterpreteerd wordt door de code.
+
+Merk op dat dit deel van de code ook beschikbaar is in de standaard code. Om de seriele monitor aan te schakelen voor de standaard code dien je enkel volgende lijn te zoeken in de `.ino` file
+
+    // set serial output on or off
+    #define TEST_WITH_SERIAL false
+
+en wijzigen in 
+
+    // set serial output on or off
+    #define TEST_WITH_SERIAL true
+
