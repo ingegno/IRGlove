@@ -1,6 +1,6 @@
 /* Based on record.ino Example sketch from IRLib2 - GPL v3
  *  Adapted by VUB http://phablabs.eu/workshop/ir-glove 
- *  Adapted by Ingegno Maker Space:
+ *  Adapted by Ingegno Maker Space in https://github.com/ingegno/IRGlove:
  *      - fix bugs
  *      - correct store of signals
  *      
@@ -168,22 +168,28 @@ void programActionForVinger(int code) {
   // we make us ready to receive signals
   myReceiver.enableIRIn(); // Start the receiver. This uses interrupt code, so we can use delay!
   delay(1000);
-  // we write on Serial what user has to do
-  if (LANG_OUTPUT == LANG_NL)  Serial.println("Houd de IR-afstandsbediening voor de ontvanger en druk je commando in..");
-  else  Serial.println("Hold the IR-remote in front of the receiver and press the button with your command..");
+  if (TEST_WITH_SERIAL) {
+    // we write on Serial what user has to do
+    if (LANG_OUTPUT == LANG_NL)  Serial.println("Houd de IR-afstandsbediening voor de ontvanger en druk je commando in..");
+    else  Serial.println("Hold the IR-remote in front of the receiver and press the button with your command..");
+  }
   // loop tot resultaten binnen zijn
   do {
     delay(1000);
-    if (LANG_OUTPUT == LANG_NL)  Serial.println("Nog niets ontvangen");
-    else Serial.println("Nothing received yet...");
+    if (TEST_WITH_SERIAL) {
+      if (LANG_OUTPUT == LANG_NL)  Serial.println("Nog niets ontvangen");
+      else Serial.println("Nothing received yet...");
+    }
   } while (!myReceiver.getResults());
   // decodeer signaal
   myDecoder.decode();
   // sla signaal op
   storeCode(code);
-  if (LANG_OUTPUT == LANG_NL)  Serial.print("Code opgeslagen als signaal: ");
-  else Serial.print("Code saved as signal: ");
-  Serial.println(code+1);
+  if (TEST_WITH_SERIAL) {
+    if (LANG_OUTPUT == LANG_NL)  Serial.print("Code opgeslagen als signaal: ");
+    else Serial.print("Code saved as signal: ");
+    Serial.println(code+1);
+  }
 }
 
 
