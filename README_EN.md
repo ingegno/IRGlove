@@ -128,7 +128,7 @@ Install then via the library manager (`CTRL+SHIFT+I`) following library:
 ![Install EEPROMex](doc/fig/EEPROMex_lib.png)
 
 Next, download via this link [IRLib2](https://github.com/cyborg5/IRLib2) via the **Download Zip** button (We used version 3 Jun 2018). VOEG HIER SCREENSHOT TOE
-Unzip de download, en kopieer **een deel** van de Download naar de Arduino library folder zodat deze volgende structuur heeft: 
+Unzip the download, and copyr **a partl** of the Download to the Arduino library directory so that this would contain following structure:
 
     Arduino/libraries/IRLib2
     Arduino/libraries/IRLibFreq
@@ -136,80 +136,80 @@ Unzip de download, en kopieer **een deel** van de Download naar de Arduino libra
     Arduino/libraries/IRLibRecv
     Arduino/libraries/IRLibRecvPCI
 
-Op Windows is dit normaal in locatie `C:\Users\USERNAME\Documents\Arduino`, op linux in `\home\USERNAME\Arduino`.
+On Windows this is normally in location `C:\Users\USERNAME\Documents\Arduino`, on linux in `\home\USERNAME\Arduino`.
 
-### IRGlove code - Standaard Code
-#### Installatie
-Download de code van deze git via de **Download zip** knop en unzip de download. 
-Dubbel klik op de `IRGlove-master/IRGlove/IRGlove.ino` file in de unzipped code folder. Dit zal Arduino 1.8.8 openen op onze code. 
+### IRGlove code - Standard Code
+#### Installation
+Download the code of this git using the **Download zip** button and en unzip the download. 
+Double click on the `IRGlove-master/IRGlove/IRGlove.ino` file in thee unzipped code directory. This wil open Arduino 1.8.8 with our code. 
 
-Selecteer als bord Arduino Nano. Druk op compileer om te code te verifieren. 
+Select as board Arduino Nano. Press on Compile in the IDE to verify the code. 
 
-Krijg je de fout:
+If you obtain following errort:
 
     lto1: internal compiler error: in lto_output_varpool_node, at lto-cgraph.c:624
     Please submit a full bug report,
     with preprocessed source if appropriate.
 
-dan dien je oplossing uit [deze thread](https://forum.arduino.cc/index.php?topic=574020.0) uit te voeren als gevolg van bug [39](https://github.com/arduino/ArduinoCore-avr/issues/39):
+then you must apply the solution from [this thread](https://forum.arduino.cc/index.php?topic=574020.0) as a consequence of bug [39](https://github.com/arduino/ArduinoCore-avr/issues/39):
 
     Tools > Board > Boards Manager
-    Wait for downloads to finish. WAT IS DIT WACHTEN????
+    Wait for downloads to finish.
     When you move the mouse pointer over "Arduino AVR Boards", you will see a "Select version" dropdown menu appear. Select "1.6.21". SCREENSHOT
     Click "Install".
     Wait for installation to finish.
     Click "Close".
 
-Na dit project kun je opnieuw de laatste versie van de *Arduino AVR Boards* installeren.
+After finishing this project, you can install again the lastest version via *Arduino AVR Boards*.
 
-Laad de code op je Arduino Nano.
+Upload the code on your Arduino Nano.
 
-#### Werking Code
-De code werkt volgens een *state machine*, in het Nederlands *Eindigetoestandsautomaat*. Is het de eerste keer dat je de code oplaad, dan moet je nog programmeren wat de vingers moeten doen. 
+#### How does the Code work?
+The code works using a *state machine*. If this is the first time you use the code, you must still program what the fingers must do. 
 
-De toestanden van de code zijn als volgt:
+The different states are as follows:
 
-![finite state machine](doc/IRGlove%20-%20state%20machine%20-%20NL.png)
+![finite state machine](doc/IRGlove%20-%20state%20machine.png)
 
-Je gebruikt dus de pink (verbonden aan pin 7 van de Arduino) om tussen de toestanden te schakelen, kiest de vinger die je wil programmeren, en stuurt een IR bericht om dit op te slaat. Kijk naar de interne LED om te weten in welke toestand de Arduino Nano zich bevindt.
+You use your pink (connected to pin 7 of the Arduino) to switch between states, then choose the finger you want to program, and send an IR message to save this as action for this finger. Watch the internal LED to watch which state the Arduino Nano is in.
 
-De LED is uit in de normale werking als codes uitgestuurd worden. Dit betekend dat enkel de POWER LED brandt:
+The LED is out in the normal state, when the device emits IR codes. This means only the POWER LED is on:
 
 ![finite state machine](doc/fig/program01.png)
 
-Terwijl gewacht wordt om een vinger te kiezen om te programmeren flikkert de LED aan en uit. Als er gewacht wordt op een IR code van een telecommando, zal de LED aan zijn.
+While the device waits on the finger selected to be programmed; the LED flashes on and off. Once you selected a finger to program, the device waits for an IR code to arrive and store, which is indicated with the LED which will be on.
 
 
 ![finite state machine](doc/fig/program02.png)
 
-Zodra een code ontvangen is, schakelt de LED weer uit.
+As soon as a code has been received, the LED switches off again.
 
-Wil je weten hoe deze eindigetoestandsautomaat geprogrammeerd werd? De basis werd in onze blokkencode gemaakt en dan geintegreerd in de code. Je kan de automaat bekijken via [onze blokkencode](http://blokkencode.ingegno.be/) waar je volgende xml moet opladen: [ProgramStates.xml](doc/ProgramStates.xml)
+Do you want to know how we programmed this state machine? The basis was made with our block code editor, and then integrated with the code. You can investigate the state machine via [our block code editor](http://blokkencode.ingegno.be/index_en.html) where you should upload following xml to see the blocks: [ProgramStates.xml](doc/ProgramStates.xml)
 
 ### IRGlove code - Test Code
-#### Installatie
-Download de code van deze git via de **Download zip** knop en unzip de download. 
-Dubbel klik op de `IRGlove-master/IRGlove_SerialProgrammed/IRGlove_SerialProgrammed.ino` file in de unzipped code folder. Dit zal Arduino 1.8.8 openen op onze code. 
+#### Installation
+Download the code of this git via de **Download zip** button and unzip the download. 
+Double click on the `IRGlove-master/IRGlove_SerialProgrammed/IRGlove_SerialProgrammed.ino` file in the unzipped code directory. This will open the Arduino 1.8.8 IDE. 
 
-Selecteer als bord Arduino Nano. Druk op compileer om te code te verifieren. 
+Select as board the Arduino Nano. Press the compile button to verify the code. 
 
-Krijg je de fout:
+Do you obtain the error:
 
     lto1: internal compiler error: in lto_output_varpool_node, at lto-cgraph.c:624
     Please submit a full bug report,
     with preprocessed source if appropriate.
 
-volg dan de oplossing hierboven gegeven bij standaard code.
+follow then the solution given above in the standard code section.
 
-#### Werking
-Bij de test code hou je de Arduino Nano verbonden met de PC, en open je de Seriele monitor. Je kan via de seriele monitor de opdracht doorgeven om IR signalen op te slaan. Je krijgt feedback op de seriele monitor van ontvangen IR codes en uitgestuurde IR codes. Dit helpt je in begrijpen of een bepaalde IR code correct geinterpreteerd wordt door de code.
+#### How does it work
+For this test code you need to keep the device connected to the PC using a USB cable, and then you need to open the Serial Monitor. You can give commands via the serial monitor to order the device to record IR signals. You obtain feedback on the serial monitor about the received and send IR codes. This helps to understand if a certain IR code was correctly understood by the Arduino.
 
-Merk op dat dit deel van de code ook beschikbaar is in de standaard code. Om de seriele monitor aan te schakelen voor de standaard code dien je enkel volgende lijn te zoeken in de `.ino` file
+Remark: this test code is also available in the standard code, but disabled by default. To switch on the serial monitor in the standard code, search for following line in the  `.ino` file
 
     // set serial output on or off
     #define TEST_WITH_SERIAL false
 
-en wijzigen in 
+and change it into
 
     // set serial output on or off
     #define TEST_WITH_SERIAL true
