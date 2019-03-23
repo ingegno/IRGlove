@@ -163,7 +163,7 @@ De code werkt volgens een *state machine*, in het Nederlands *Eindigetoestandsau
 
 De toestanden van de code zijn als volgt:
 
-![finite state machine](doc/IRGlove - state machine - NL.png)
+![finite state machine](doc/IRGlove%20-%20state%20machine%20-%20NL.png)
 
 Je gebruikt dus de pink (verbonden aan pin 7 van de Arduino) om tussen de toestanden te schakelen, kiest de vinger die je wil programmeren, en stuurt een IR bericht om dit op te slaat. Kijk naar de interne LED om te weten in welke toestand de Arduino Nano zich bevindt.
 
