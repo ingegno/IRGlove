@@ -111,8 +111,11 @@ lukken zoals op volgende foto:
 
 ![stap09](doc/fig/construction_09.png)
 
+**Stap 10**
 Je circuit is af. We moeten nu de vingers bevestigen aan de handschoen, en de IR LED plaatsen waar we signalen 
-willen uitsturen.
+willen uitsturen. Het geheel zou er als volgt uit moeten zien:
+
+![stap10](doc/fig/construction_10.png)
 
 ### Handschoen
 
@@ -173,6 +176,17 @@ De toestanden van de code zijn als volgt:
 ![finite state machine](doc/IRGlove%20-%20state%20machine%20-%20NL.png)
 
 Je gebruikt dus de pink (verbonden aan pin 7 van de Arduino) om tussen de toestanden te schakelen, kiest de vinger die je wil programmeren, en stuurt een IR bericht om dit op te slaat. Kijk naar de interne LED om te weten in welke toestand de Arduino Nano zich bevindt.
+
+De LED is uit in de normale werking als codes uitgestuurd worden. Dit betekend dat enkel de POWER LED brandt:
+
+![finite state machine](doc/fig/program01.png)
+
+Terwijl gewacht wordt om een vinger te kiezen om te programmeren flikkert de LED aan en uit. Als er gewacht wordt op een IR code van een telecommando, zal de LED aan zijn.
+
+
+![finite state machine](doc/fig/program02.png)
+
+Zodra een code ontvangen is, schakelt de LED weer uit.
 
 ### IRGlove code - Test Code
 #### Installatie
